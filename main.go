@@ -1,13 +1,50 @@
 package main
+
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strconv"
 )
+
 func main() {
-	a := []int{6,5,4,3,2,1}
+	filename := "./sample.txt"
 	
-	_, inversions := SortAndCountInversions(a)
-	fmt.Println(inversions)
+	numbers, err := readIntegersFromFile(filename)
+	if err != nil {
+		fmt.Printf("Error reading file: %v\n", err)
+		return
+	}
+	
+	_, inversions := SortAndCountInversions(numbers)
+	fmt.Printf("Number of inversions: %d\n", inversions)
 }
+
+func readIntegersFromFile(filename string) ([]int, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	
+	var numbers []int
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		// Convert each line to integer
+		num, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			return nil, err
+		}
+		numbers = append(numbers, num)
+	}
+	
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	
+	return numbers, nil
+}
+
 func SortAndCountInversions(a []int) ([]int, int) {
 	n := len(a)
 	if n <= 1 {
@@ -19,6 +56,7 @@ func SortAndCountInversions(a []int) ([]int, int) {
 	d, dCount := MergeAndCountSplitInversions(b, c)
 	return d, bCount + cCount + dCount
 }
+
 func MergeAndCountSplitInversions(b []int, c[]int) ([]int, int) {
 	d := make([]int, len(b) + len(c))
 	count := 0
